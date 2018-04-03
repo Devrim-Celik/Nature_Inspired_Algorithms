@@ -8,6 +8,7 @@ from functions_week1 import *
 # * boxplot or something with multiple runs for each setup
 # * add description to function_week1 to explain what each is for and how
 #   its is done
+# * include time for measurement of compuational efficiency
 
 # Task: You have multiple Items I_1, ..., I_N, each having
 # a value V_1, ..., V_N and a corresponding Weight W_1, ..., W_N.

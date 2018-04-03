@@ -20,7 +20,7 @@ def calculate_weight_value(bag_setup, item_dictionary):
 
 
 
-def hill_climbing(item_dictionary, weight_limit, mode="square", nr_iter=50):
+def hill_climbing(item_dictionary, weight_limit, mode="square"):
     """
     Args
         item_dictionary: dictionary with all items and corresponding weights
@@ -35,14 +35,13 @@ def hill_climbing(item_dictionary, weight_limit, mode="square", nr_iter=50):
     """
     # initial bag setup is empty:
     bag = [0]*len(item_dictionary)
-    # value list for analysis
-    value_list = []
-    # for saving the best setup with form [bag, weight, value]
-    very_best_setup = [0, 0, 0]
-    # saving best value
-    best_value = 0
+    # value list for analysis, start with empty bag with weight = 0
+    value_list = [0]
+    # to save currently best value
 
-    for _ in range(nr_iter):
+    best_value = 0
+    while True:
+        old_best_value = best_value
 
         # find neighbors corresponding to mode
         if mode == "linear":
@@ -60,16 +59,20 @@ def hill_climbing(item_dictionary, weight_limit, mode="square", nr_iter=50):
                     # if better than current best, save it
                     best_value = value_temp
                     bag = n_bag
-                    # if better than current best, save
-                    if value_temp > very_best_setup[2]:
-                        very_best_setup[0] = bag
-                        very_best_setup[1] = weight_temp
-                        very_best_setup[2] = value_temp
+                    weight = weight_temp
+
+        # if it didnt change, end
+        if old_best_value == best_value:
+            # best_value, bag, weight have the current best
+            return (bag, weight, best_value), value_list
+
+        # if we continue, save current new best value
         value_list.append(best_value)
 
-    return very_best_setup, value_list
 
-def first_choice_hill_climbing(item_dictionary, weight_limit, mode="square", nr_iter=50):
+
+
+def first_choice_hill_climbing(item_dictionary, weight_limit, mode="square"):
     """
     Args
         item_dictionary: dictionary with all items and corresponding weights
@@ -84,14 +87,14 @@ def first_choice_hill_climbing(item_dictionary, weight_limit, mode="square", nr_
     """
     # initial bag setup is empty:
     bag = [0]*len(item_dictionary)
-    # value list for analysis
-    value_list = []
-    # for saving the best setup with form [bag, weight, value]
-    very_best_setup = [0, 0, 0]
+    # value list for analysis, start with empty bag with weight = 0
+    value_list = [0]
+
     # best value, initial setup
     best_value = 0
 
-    for _ in range(nr_iter):
+    while True:
+        old_best_value = best_value
 
         # find neighbors corresponding to mode
         if mode == "linear":
@@ -113,16 +116,16 @@ def first_choice_hill_climbing(item_dictionary, weight_limit, mode="square", nr_
                     # if better than current best, save it
                     best_value = value_temp
                     bag = n_bag
-                    # if better than current best, save
-                    if value_temp > very_best_setup[2]:
-                        very_best_setup[0] = bag
-                        very_best_setup[1] = weight_temp
-                        very_best_setup[2] = value_temp
-                    # difference to normal hill climbing
+                    weight = weight_temp
+                    # difference to normal hill climbing, stop at first that
+                    # is better
                     break
-        value_list.append(best_value)
+        # if it didnt change, end
+        if old_best_value == best_value:
+            return (bag, weight, best_value), value_list
 
-    return very_best_setup, value_list
+        # if we continue, save current new best value
+        value_list.append(best_value)
 
 def find_linear_neighborhood(current_bag):
     """
