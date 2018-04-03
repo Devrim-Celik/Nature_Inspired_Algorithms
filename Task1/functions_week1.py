@@ -39,10 +39,10 @@ def hill_climbing(item_dictionary, weight_limit, mode="square", nr_iter=50):
     value_list = []
     # for saving the best setup with form [bag, weight, value]
     very_best_setup = [0, 0, 0]
-
+    # saving best value
+    best_value = 0
 
     for _ in range(nr_iter):
-        best_value = 0
 
         # find neighbors corresponding to mode
         if mode == "linear":
