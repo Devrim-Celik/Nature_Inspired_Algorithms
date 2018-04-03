@@ -6,6 +6,8 @@ from functions_week1 import *
 # TODO:
 # * harder task
 # * boxplot or something with multiple runs for each setup
+# * add description to function_week1 to explain what each is for and how
+#   its is done
 
 # Task: You have multiple Items I_1, ..., I_N, each having
 # a value V_1, ..., V_N and a corresponding Weight W_1, ..., W_N.
@@ -22,13 +24,13 @@ if __name__ == "__main__":
     "gold_bars": [300, 4000], "rings": [1,5000], "gold_bucket":[200,5000]}
     # maximum weight
     MAX_WEIGHT = 400
+    # available modes for finding neighbors
+    MODES = ["linear", "square"]
 
-    modes = ["linear", "square"]
-
-    for mode in modes:
-
+    for mode in MODES:
         # --- First Choice Hill Climbing
         best_setup, value_history = first_choice_hill_climbing(ITEMS_DIC, MAX_WEIGHT, mode=mode)
+        # values for best bag setup
         bag, weight, value = best_setup
 
         print("[+] First Choice Hill Climbing with mode '{}': Bag={}, \
@@ -43,8 +45,8 @@ if __name__ == "__main__":
         plt.show()
 
         # --- Default Hill Climbing
-
         best_setup, value_history = hill_climbing(ITEMS_DIC, MAX_WEIGHT, mode=mode)
+        # values for best bag setup
         bag, weight, value = best_setup
 
         print("[+] Default Hill Climbing with mode '{}': Bag={}, Weight={}, \
