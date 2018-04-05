@@ -4,7 +4,7 @@ from random import shuffle
 from functions_week1 import *
 
 # TODO:
-# * harder task
+# * multiple runs with avg value, weight and time for each
 # * boxplot or something with multiple runs for each setup
 # * add description to function_week1 to explain what each is for and how
 #   its is done
@@ -21,8 +21,17 @@ from functions_week1 import *
 # Setup
 if __name__ == "__main__":
     # dictionary with items, values and weights
-    ITEMS_DIC = {"small_coins": [10, 1000], "big_coins": [100, 2000], \
+    ITEMS_DIC = {"small_coins": [10, 1000], "big_coins": [100, 2000],
     "gold_bars": [300, 4000], "rings": [1,5000], "gold_bucket":[200,5000]}
+
+    # second, harder setup
+    # NOTE: "gold_block" fucks up default hill climibng, since the weight
+    # blocks all further improvements
+    ITEMS_DIC2 = {"small_coins": [10, 1000], "big_coins": [100, 2000],
+    "gold_bars": [300, 4000], "rings": [1,5000], "gold_bucket":[200, 5000],
+    "gold_disk": [73, 3000], "gold_tooth": [7, 500], "gold_nugget": [25, 200],
+    "iron_block": [125, 4000], "amulet": [2, 100]}
+
     # maximum weight
     MAX_WEIGHT = 400
     # available modes for finding neighbors
@@ -30,12 +39,11 @@ if __name__ == "__main__":
 
     for mode in MODES:
         # --- First Choice Hill Climbing
-        best_setup, value_history = first_choice_hill_climbing(ITEMS_DIC, MAX_WEIGHT, mode=mode)
+        best_setup, value_history = first_choice_hill_climbing(ITEMS_DIC2, MAX_WEIGHT, mode=mode)
         # values for best bag setup
         bag, weight, value = best_setup
 
-        print("[+] First Choice Hill Climbing with mode '{}': Bag={}, \
-        Weight={}, Value={}".format(mode, bag, weight, value))
+        print("[+] First Choice Hill Climbing with mode '{}':\n Bag={}, Weight={}, Value={}".format(mode, bag, weight, value))
 
         # plot value history
         plt.figure("V_HIS")
@@ -46,12 +54,11 @@ if __name__ == "__main__":
         plt.show()
 
         # --- Default Hill Climbing
-        best_setup, value_history = hill_climbing(ITEMS_DIC, MAX_WEIGHT, mode=mode)
+        best_setup, value_history = hill_climbing(ITEMS_DIC2, MAX_WEIGHT, mode=mode)
         # values for best bag setup
         bag, weight, value = best_setup
 
-        print("[+] Default Hill Climbing with mode '{}': Bag={}, Weight={}, \
-        Value={}".format(mode, bag, weight, value))
+        print("[+] Default Hill Climbing with mode '{}':\n Bag={}, Weight={}, Value={}".format(mode, bag, weight, value))
 
         # plot value history
         plt.figure("V_HIS")
