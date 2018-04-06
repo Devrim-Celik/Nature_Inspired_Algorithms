@@ -11,6 +11,7 @@ from functions_week1 import *
 # * include time for measurement of compuational efficiency
 # * smarter, harder setup
 # * instead of just adding them up, save history value for later distribution
+# * also add number of steps needed
 
 # Task: You have multiple Items I_1, ..., I_N, each having
 # a value V_1, ..., V_N and a corresponding Weight W_1, ..., W_N.
