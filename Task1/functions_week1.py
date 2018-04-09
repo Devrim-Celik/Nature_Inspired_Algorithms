@@ -1,7 +1,11 @@
 from random import shuffle
 
+
 def calculate_weight_value(bag_setup, item_dictionary):
     """
+    Given the current bag_setup and the item_dictionary (corresponding weights
+    and values of the items) it calculates the total weight and value of the
+    bag.
     Args
         bag_setup: indicates which items are picked in current bag setup
         item_dictionary: dictionary with all items and corresponding weights
@@ -12,16 +16,16 @@ def calculate_weight_value(bag_setup, item_dictionary):
     weight_temp = 0
     value_temp = 0
     for picked_boolean, weight_value_tuple in zip(bag_setup, item_dictionary.values()):
-        if picked_boolean:
-            weight_temp += weight_value_tuple[0]
-            value_temp += weight_value_tuple[1]
+        if picked_boolean:  # If the item is picked, so it's on bag_setup
+            weight_temp += weight_value_tuple[0]  # Add weight
+            value_temp += weight_value_tuple[1]  # Add value
 
     return (weight_temp, value_temp)
 
 
-
 def hill_climbing(item_dictionary, weight_limit, mode="square"):
     """
+    It chooses the steepest descent neighbor until no improvement is possible.
     Args
         item_dictionary: dictionary with all items and corresponding weights
             and values
@@ -61,7 +65,7 @@ def hill_climbing(item_dictionary, weight_limit, mode="square"):
                     bag = n_bag
                     weight = weight_temp
 
-        # if it didnt change, end
+        # if it didn't change, end
         if old_best_value == best_value:
             # best_value, bag, weight have the current best
             return (bag, weight, best_value), value_list
@@ -70,10 +74,10 @@ def hill_climbing(item_dictionary, weight_limit, mode="square"):
         value_list.append(best_value)
 
 
-
-
 def first_choice_hill_climbing(item_dictionary, weight_limit, mode="square"):
     """
+    It chooses the steepest descent neighbor until no improvement is possible.
+    In contrast to HC it stops iterating neighbors when a better one is found.
     Args
         item_dictionary: dictionary with all items and corresponding weights
             and values
@@ -111,7 +115,6 @@ def first_choice_hill_climbing(item_dictionary, weight_limit, mode="square"):
             # check if weight is not over limit
             if weight_temp <= weight_limit:
                 # look for best setup
-
                 if value_temp > best_value:
                     # if better than current best, save it
                     best_value = value_temp
@@ -127,8 +130,10 @@ def first_choice_hill_climbing(item_dictionary, weight_limit, mode="square"):
         # if we continue, save current new best value
         value_list.append(best_value)
 
+
 def find_linear_neighborhood(current_bag):
     """
+    It swaps the current neighbor value with the one on the right.
     Args
         current_bag:     current items in bag
         item_dictionary: dictionary with all items and corresponding weights
@@ -140,7 +145,7 @@ def find_linear_neighborhood(current_bag):
 
     # we find linear neighborhood by changing each item in the current bag setup
     for i in range(len(current_bag)):
-        # copy bag (by value via "[:]"
+        # copy bag (by value via "[:]")
         copy_bag = current_bag[:]
         # change value
         copy_bag[i] = 1-copy_bag[i]
@@ -151,6 +156,7 @@ def find_linear_neighborhood(current_bag):
 
 def find_square_neighborhood(current_bag):
     """
+    It swaps values of two arbitrary variables.
     Args
         current_bag:     current items in bag
         item_dictionary: dictionary with all items and corresponding weights
