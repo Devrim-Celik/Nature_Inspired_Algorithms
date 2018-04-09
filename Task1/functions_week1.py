@@ -1,5 +1,5 @@
 from random import shuffle
-
+import numpy as np
 
 def calculate_weight_value(bag_setup, item_dictionary):
     """
@@ -37,8 +37,10 @@ def hill_climbing(item_dictionary, weight_limit, mode="square"):
         tuple with first element being a tuple (best_setup, weight, best_value)
         and the second element being the history of the values
     """
-    # initial bag setup is empty:
-    bag = [0]*len(item_dictionary)
+    # initial bag setup is random, but is supposed to be under the weight limit
+    bag = list(np.random.choice([0,1], size=(len(item_dictionary,))))
+    while calculate_weight_value(bag, item_dictionary)[0] > weight_limit:
+        bag = list(np.random.choice([0,1], size=(len(item_dictionary,))))
     # value list for analysis, start with empty bag with weight = 0
     value_list = [0]
     # to save currently best value
@@ -55,7 +57,7 @@ def hill_climbing(item_dictionary, weight_limit, mode="square"):
             neighbors = find_linear_neighborhood(bag)
         elif mode == "square":
             neighbors = find_square_neighborhood(bag)
-
+        
         # each element in neighbors is tuple: (bag_setup, value, weight)
         for n_bag in neighbors:
             weight_temp, value_temp = calculate_weight_value(n_bag, item_dictionary)
@@ -92,8 +94,10 @@ def first_choice_hill_climbing(item_dictionary, weight_limit, mode="square"):
         tuple with first element being a tuple (best_setup, weight, best_value)
         and the second element being the history of the values
     """
-    # initial bag setup is empty:
-    bag = [0]*len(item_dictionary)
+    # initial bag setup is random, but is supposed to be under the weight limit
+    bag = list(np.random.choice([0,1], size=(len(item_dictionary,))))
+    while calculate_weight_value(bag, item_dictionary)[0] > weight_limit:
+        bag = list(np.random.choice([0,1], size=(len(item_dictionary,))))
     # value list for analysis, start with empty bag with weight = 0
     value_list = [0]
 
