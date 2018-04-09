@@ -3,14 +3,7 @@ from functions_week1 import first_choice_hill_climbing, hill_climbing
 import time
 
 # TODO:
-# * multiple runs with avg value, weight and time for each
-# * boxplot or something with multiple runs for each setup
-# * add description to function_week1 to explain what each is for and how
-#   its is done
-# * include time for measurement of compuational efficiency
 # * smarter, harder setup
-# * instead of just adding them up, save history value for later distribution
-# * also add number of steps needed
 
 # Task: You have multiple Items I_1, ..., I_N, each having
 # a value V_1, ..., V_N and a corresponding Weight W_1, ..., W_N.
@@ -59,17 +52,13 @@ if __name__ == "__main__":
     MODES = ["linear", "square"]
 
     # for saving all value across all runs with form: [Weight, Value, Time]
+    # for all but the first value we want to save each value to later plot a
+    # distribution later on
     history = {
-        "FCHC_linear": [0, 0, 0],
-        "FCHC_square": [0, 0, 0],
-        "DHC_linear": [0, 0, 0],
-        "DHC_square": [0, 0, 0]
-        }
-    history_values = {
-        "FCHC_linear": list(),
-        "FCHC_square": list(),
-        "DHC_linear": list(),
-        "DHC_square": list()
+        "FCHC_linear": [0, [], [], []],
+        "FCHC_square": [0, [], [], []],
+        "DHC_linear": [0, [], [], []],
+        "DHC_square": [0, [], [], []]
         }
 
     # run multiple runs to get average runs (since we have randomness)
@@ -77,7 +66,7 @@ if __name__ == "__main__":
         for mode in MODES:
             start = time.time() * 1000  # Store the starting time in ms
             # --- First Choice Hill Climbing
-            best_setup, value_history = first_choice_hill_climbing(
+            best_setup, value_history, nr_iter = first_choice_hill_climbing(
                 ITEMS_DIC2,
                 MAX_WEIGHT,
                 mode=mode
@@ -88,9 +77,9 @@ if __name__ == "__main__":
             bag, weight, value = best_setup
             # add to history
             history["FCHC_"+mode][0] += weight
-            history["FCHC_"+mode][1] += value
-            history["FCHC_"+mode][2] += elapsed
-            history_values["FCHC_"+mode].append(value_history)
+            history["FCHC_"+mode][1].append(value)
+            history["FCHC_"+mode][2].append(elapsed)
+            history["FCHC_"+mode][3].append(nr_iter)
 
             if do_print:
                 print("[+] First Choice Hill Climbing with mode '{}':\n Bag={}, Weight={}, Value={}".format(mode, bag, weight, value))
@@ -106,7 +95,7 @@ if __name__ == "__main__":
 
             start = time.time() * 1000  # Store the starting time in ms
             # --- Default Hill Climbing
-            best_setup, value_history = hill_climbing(
+            best_setup, value_history, nr_iter = hill_climbing(
                 ITEMS_DIC2,
                 MAX_WEIGHT,
                 mode=mode
@@ -117,9 +106,9 @@ if __name__ == "__main__":
             bag, weight, value = best_setup
             # add to history
             history["DHC_"+mode][0] += weight
-            history["DHC_"+mode][1] += value
-            history["DHC_"+mode][2] += elapsed
-            history_values["DHC_"+mode].append(value_history)
+            history["DHC_"+mode][1].append(value)
+            history["DHC_"+mode][2].append(elapsed)
+            history["DHC_"+mode][3].append(nr_iter)
 
             if do_print:
                 print("[+] Default Hill Climbing with mode '{}':\n Bag={}, Weight={}, Value={}".format(mode, bag, weight, value))
@@ -133,21 +122,47 @@ if __name__ == "__main__":
                 plt.plot(value_history)
                 plt.show()
 
-    # normalize values to get averages (in new lists)
-    FCHC_LIN = [x/RUNS for x in history["FCHC_linear"]]
-    FCHC_SQ = [x/RUNS for x in history["FCHC_square"]]
-    DHC_LIN = [x/RUNS for x in history["DHC_linear"]]
-    DHC_SQ = [x/RUNS for x in history["DHC_square"]]
-    plt.figure()
-    plt.boxplot(history_values['FCHC_linear'])
-    plt.figure()
-    plt.boxplot(history_values['FCHC_square'])
-    plt.figure()
-    plt.boxplot(history_values['DHC_linear'])
-    plt.figure()
-    plt.boxplot(history_values['DHC_square'])
+    # normalize values to get averages (for non-list properties)
+    for value_list in history.values():
+        value_list[0] = value_list[0]/RUNS
+
+    # lists, where we save all available lists of the current value for one
+    # complete boxplot plot
+    value_lists_final = []
+    elapsed_per_iter_lists_final = []
+    nr_iterations_lists_final = []
+
+    for key, value in history.items():
+        #print(key, value[0])
+        # append all lists
+        value_lists_final.append(value[1])
+        # NOTE: we want the iteration per cycle, thus divide total number by
+        #   number of cycles
+        elapsed_per_iter_lists_final.append([total/nr for total, nr in zip(value[2], value[3])])
+        nr_iterations_lists_final.append(value[3])
+
+    # VALUE
+    plt.figure("Value Distribution Boxplots", figsize=(20,10))
+    plt.title("Value Distribution Boxplots with {} Runs".format(RUNS))
+    plt.boxplot(value_lists_final)
+    plt.xticks([1,2,3,4], ["FCHC-lin", "FCHC-sqr", "DHC-lin", "DHC-sqr"])
+    plt.ylabel("Value")
+    plt.savefig("values.png")
+
+    # ELAPSED TIME PER CYCLE
+    plt.figure("Elapsed Time per Iteration Distribution Boxplots", figsize=(20,10))
+    plt.title("Elapsed Time per Iteration Distribution Boxplots with {} Runs".format(RUNS))
+    plt.boxplot(elapsed_per_iter_lists_final)
+    plt.xticks([1,2,3,4], ["FCHC-lin", "FCHC-sqr", "DHC-lin", "DHC-sqr"])
+    plt.ylabel("Elapsed Time per Iteration [ms]")
+    plt.savefig("time_per_iteration.png")
+
+    # NUMBER OF ITERATIONS
+    plt.figure("Number Iterations Distribution Boxplots", figsize=(20,10))
+    plt.title("Number Iterations Distribution Boxplots with {} Runs".format(RUNS))
+    plt.boxplot(nr_iterations_lists_final)
+    plt.xticks([1,2,3,4], ["FCHC-lin", "FCHC-sqr", "DHC-lin", "DHC-sqr"])
+    plt.ylabel("Number of Iterations")
+    plt.savefig("nr_of_iterations.png")
+
     plt.show()
-    print("FCHC_LIN:\t" + str(FCHC_LIN))
-    print("FCHC_SQ:\t" + str(FCHC_SQ))
-    print("DHC_LIN:\t" + str(DHC_LIN))
-    print("DHC_SQ:\t\t" + str(DHC_SQ))

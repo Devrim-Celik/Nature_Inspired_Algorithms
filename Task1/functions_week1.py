@@ -44,7 +44,10 @@ def hill_climbing(item_dictionary, weight_limit, mode="square"):
     # to save currently best value
 
     best_value = 0
+    iter_counter = 0
     while True:
+        iter_counter += 1 # count number of needed iterations
+
         old_best_value = best_value
 
         # find neighbors corresponding to mode
@@ -68,7 +71,7 @@ def hill_climbing(item_dictionary, weight_limit, mode="square"):
         # if it didn't change, end
         if old_best_value == best_value:
             # best_value, bag, weight have the current best
-            return (bag, weight, best_value), value_list
+            return (bag, weight, best_value), value_list, iter_counter
 
         # if we continue, save current new best value
         value_list.append(best_value)
@@ -96,8 +99,9 @@ def first_choice_hill_climbing(item_dictionary, weight_limit, mode="square"):
 
     # best value, initial setup
     best_value = 0
-
+    iter_counter = 0
     while True:
+        iter_counter += 1 # count number of used iterations
         old_best_value = best_value
 
         # find neighbors corresponding to mode
@@ -125,7 +129,7 @@ def first_choice_hill_climbing(item_dictionary, weight_limit, mode="square"):
                     break
         # if it didnt change, end
         if old_best_value == best_value:
-            return (bag, weight, best_value), value_list
+            return (bag, weight, best_value), value_list, iter_counter
 
         # if we continue, save current new best value
         value_list.append(best_value)
