@@ -1,5 +1,11 @@
-import numpy as np
+"""
+This module provides multiple functions for Genetic Algorithms such as
+combination or mutation functions
+"""
+
 import random
+import numpy as np
+
 
 def k_point_crossover(chrom1, chrom2, k=1, swap_p=0.5):
     """
@@ -16,7 +22,8 @@ def k_point_crossover(chrom1, chrom2, k=1, swap_p=0.5):
     """
 
     if k > (len(chrom1)-1) or k < 1:
-        raise Exception("[-] k was chosen to be {}, but k is only allowed to be chosen from the interval [1; {}]!".format(k, len(chrom1)-1))
+        raise Exception("""[-] k was chosen to be {}, but k is only allowed to
+            be chosen from the interval [1; {}]!""".format(k, len(chrom1)-1))
 
 
     # generate empty chromosomes for offsprings
@@ -59,9 +66,11 @@ def k_point_crossover(chrom1, chrom2, k=1, swap_p=0.5):
 
     return offspring1, offspring2
 
+
 # ---
 
-def uniform_crossover(chrom1, chrom2, swap_p=0.5):
+
+def uniform_crossover(chrom1, chrom2, swap_p=0.6):
     """
     Uniform Crossover
 
@@ -94,7 +103,9 @@ def uniform_crossover(chrom1, chrom2, swap_p=0.5):
 
     return offspring1, offspring2
 
+
 # ---
+
 
 def mutation(chrom, allele_list, p_m=0.05):
     """
@@ -120,9 +131,11 @@ def mutation(chrom, allele_list, p_m=0.05):
 
     return chrom
 
+
 # ---
 
-def bitflip_mutation(chrom, p_m=0.25):
+
+def bitflip_mutation(chrom, p_m=0.05):
     """
     Bit-Flip Mutation
 
@@ -145,4 +158,58 @@ def bitflip_mutation(chrom, p_m=0.25):
 
     return chrom
 
-# TODO replacement
+
+# ---
+
+
+def replacement(old_pop, new_pop, n=None, fitness_old=[], fitness_new=[],
+    based_on_fitness=True, mode="delete-all"):
+    """
+    TODO
+    modes = ["delete-all", "steady-state", "steady-state-no-duplicates"]
+    """
+    # if mode is "delete-all", simply return the new population
+    if mode == "delete-all":
+        return new_pop
+
+    # if not, check if n was supplied
+    if n is None:
+        raise Exception("[-] Please supply n when using steady-state modes!")
+
+    # generate list for the resulting population, starting as the old_pop
+    population = old_pop[:]
+
+    # here we generate lists of indx for the old population and values to
+    # replace them with from the new population
+
+    # for the "steady-state mode" ...
+    if mode == "steady-state":
+        # choose n random indexes from the old_pop
+        # replace=False ensures no duplicates
+        indx_list = np.random.choice(range(len(old_pop)), size=n, replace=False)
+        # and n random values from new_pop
+        value_list = np.random.choice(new_pop, size=n, replace=False)
+
+    elif mode == "steady-state-no-duplicates":
+        """
+        check if fitness lsits are defined
+        build two correpsonding lists of indx and values to replace
+        """
+        pass
+
+    # now that we got our lists, simply replace them
+    for indx, val in zip(indx_list, value_list):
+        population[indx] = val
+
+    return population
+
+
+
+x = [0,0,0,0,0,0,0,0]
+y = [1,2,3,4,5,6,7,8]
+
+k = replacement(x,y,n=3,mode="steady-state")
+print(k)
+
+
+# TODO replacement and selection
