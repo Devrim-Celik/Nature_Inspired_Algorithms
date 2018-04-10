@@ -11,12 +11,12 @@ def k_point_crossover(chrom1, chrom2, k=1, swap_p=0.5):
     """
     k Point Crossover
 
-    Args
+    Args:
         chrom1: chromosome of parent 1
         chrom2: chromosome of parent 2
         k     : number of crossovers
         swap_p: swapping probability
-    Returns
+    Returns:
         offspring1: first offspring
         offspring2: second offspring
     """
@@ -74,10 +74,10 @@ def uniform_crossover(chrom1, chrom2, swap_p=0.6):
     """
     Uniform Crossover
 
-    Args
+    Args:
         chrom1: chromosome of parent 1
         chrom2: chromosome of parent 2
-    Returns
+    Returns:
         offspring1: first offspring
         offspring2: second offspring
     """
@@ -111,11 +111,11 @@ def mutation(chrom, allele_list, p_m=0.05):
     """
     Default Mutation
 
-    Args
+    Args:
         chrom      : chromosome list
         allele_list: list of possible allele to mutate to
         p_m        : mutation probability
-    Returns
+    Returns:
         chrom      : mutated chromose list
     """
 
@@ -139,10 +139,10 @@ def bitflip_mutation(chrom, p_m=0.05):
     """
     Bit-Flip Mutation
 
-    Args
+    Args:
         chrom      : chromosome list
         p_m        : mutation probability
-    Returns
+    Returns:
         chrom      : mutated chromose list
     """
 
@@ -162,11 +162,27 @@ def bitflip_mutation(chrom, p_m=0.05):
 # ---
 
 
-def replacement(old_pop, new_pop, n=None, fitness_old=[], fitness_new=[],
-    based_on_fitness=True, mode="delete-all"):
+def replacement(old_pop, new_pop, mode="delete-all", n=None,
+    based_on_fitness=True, fitness_old=[], fitness_new=[]):
     """
-    TODO
-    modes = ["delete-all", "steady-state", "steady-state-no-duplicates"]
+    Replacement of old population through new population
+
+    Args:
+        old_pop: old population
+        new_pop: new population
+        mode: chosen from options: ['delete-all', 'steady-state']
+            * 'delete-all': replace old population through new one
+            * 'steady-state'; replace n members of the old population by n
+                members of the new population
+        n: number of members to be replaced if 'stead-state' is chosen as mode
+        based_on_fitness: boolea, if chosen, you will replace the n worst
+            members of the old population the n best members of the new
+            population
+        fitness_old: corresponding fitness values for the old population
+        fitness_new: corresponding fitness values for the new population
+
+    Returns:
+        population: replaced population
     """
     # if mode is "delete-all", simply return the new population
     if mode == "delete-all":
@@ -183,19 +199,34 @@ def replacement(old_pop, new_pop, n=None, fitness_old=[], fitness_new=[],
     # replace them with from the new population
 
     # for the "steady-state mode" ...
-    if mode == "steady-state":
+    if mode == "steady-state" and not based_on_fitness:
         # choose n random indexes from the old_pop
         # replace=False ensures no duplicates
         indx_list = np.random.choice(range(len(old_pop)), size=n, replace=False)
         # and n random values from new_pop
         value_list = np.random.choice(new_pop, size=n, replace=False)
 
-    elif mode == "steady-state-no-duplicates":
+    elif mode == "steady-state" and based_on_fitness:
         """
         check if fitness lsits are defined
         build two correpsonding lists of indx and values to replace
         """
-        pass
+        if len(fitness_old) != len(old_pop) or len(fitness_new) != len(new_pop):
+            raise Exception("""[-] Both 'fitness_old' and 'fitness_new' need to be
+            the same length as 'old_pop' and 'new_pop'""")
+        # check if sort the right way
+        # sort populations, based on their fitness score as sort key
+        # (for old population we want the n worst member, thus default sorted
+        # [small to big] does just fine, for the new population we want the
+        # n best member, thus we include a -)
+        # for old population, sort the indexes to be replace
+        # for new population, sort the member to replace with
+        indx_list = [indx_old for _, indx_old in \
+            sorted(zip(fitness_old, range(len(old_pop))), \
+            key=lambda pair: pair[0])][:n]
+        value_list = [member for _, member in \
+            sorted(zip(fitness_new, new_pop), \
+            key=lambda pair: -pair[0])][:n]
 
     # now that we got our lists, simply replace them
     for indx, val in zip(indx_list, value_list):
@@ -204,12 +235,20 @@ def replacement(old_pop, new_pop, n=None, fitness_old=[], fitness_new=[],
     return population
 
 
+"""
+# SETUP for testing steady-state mode based on fitness
+old = ["a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"]
+old_fit = [1,2,3,4,5,6,7,8]
+new = ["a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2"]
+new_fit = [10,20,30,40,50,60,70,80]
 
-x = [0,0,0,0,0,0,0,0]
-y = [1,2,3,4,5,6,7,8]
-
-k = replacement(x,y,n=3,mode="steady-state")
+k = replacement(old, new, fitness_old=old_fit,
+    fitness_new=new_fit,n=3,mode="steady-state")
 print(k)
+"""
 
 
-# TODO replacement and selection
+# ---
+
+
+# TODO  selection
