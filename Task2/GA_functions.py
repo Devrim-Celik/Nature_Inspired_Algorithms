@@ -6,13 +6,14 @@ combination or mutation functions
 import random
 import numpy as np
 
-
-def initializer(setup):
+# TODO add population size
+def initializer_makespan(setup, size):
     """
     initializer function, creates and returns the setup of the task
 
     Args:
         setup: integer in [1,2,3], deciding which setup to choose
+        size: population size
 
     Returns:
         machines: number of machines
@@ -24,33 +25,34 @@ def initializer(setup):
         machines = 20
 
         # for each job, randomly assign one machine
-        jobs = np.random.randint(machines, size=300)
+        population = np.random.randint(machines, size=(size, 300))
 
         # processing times
         processint_times_1 = np.random.randint(low=10, high=1000, size=200)
         processint_times_2 = np.random.randint(low=100, high=300, size=100)
         times = np.hstack((processint_times_1, processint_times_2))
 
-        return (machines, jobs, times)
+        return (machines, population, times)
 
     elif setup == 2:
         machines = 20
 
         # for each job, randomly assign one machine
-        jobs = np.random.randint(machines, size=300)
+        population = np.random.randint(machines, size=(size, 300))
 
         # processing times
         processint_times_1 = np.random.randint(low=10, high=1000, size=150)
         processint_times_2 = np.random.randint(low=400, high=700, size=150)
         times = np.hstack((processint_times_1, processint_times_2))
 
-        return (machines, jobs, times)
+        return (machines, population, times)
+
 
     if setup == 3:
         machines = 50
 
         # for each job, randomly assign one machine
-        jobs = np.random.randint(machines, size=101)
+        population = np.random.randint(machines, size=(size, 101))
 
         # processing times
         times = np.empty((101,))
@@ -64,9 +66,54 @@ def initializer(setup):
             last += 2
             value += 1
 
-        return (machines, jobs, times)
+        return (machines, population, times)
 
     raise Exception("[-] 'setup' hast to be either 1, 2 or 3!")
+
+
+# ---
+
+
+def evaluation_makespan(population, times, nr_machines):
+    """
+    Evaluation or Generation of Fitness scores, based on the longest time
+    one machine will take in a setup.
+
+    Args:
+        population: list of setups/chromosomes
+        times: processing times for each task
+        nr_machines: number of machines in this task
+
+    Returns:
+        fitness: list of fitness scores
+    """
+    # the worst assignment possible is that one machine is assigned all jobs,
+    # resulting inthe sum of all processing times
+    maximum_possible_time = sum(times)
+
+    # fitness score list
+    fitness = np.empty((population.shape[0], ))
+
+    for i, member in enumerate(population):
+        # to calculate the fitness, we look at the longest time a machine
+        # will take, since this will determine the overall runtime ("a society
+        # is as strong as its worst members")
+
+        current_worst = 0
+
+        for machine in range(nr_machines):
+
+            temp = sum([times[indx] for indx in range(len(member)) if member[indx] == machine])
+
+            # check if it is the worst machine in this member
+            if temp > current_worst:
+                current_worst = temp
+
+        # our fitness measurement is the distance to the worst possible
+        # assignment:
+        fitness[i] = maximum_possible_time - current_worst
+
+    return fitness
 
 
 # ---
