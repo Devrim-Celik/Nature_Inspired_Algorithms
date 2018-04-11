@@ -7,6 +7,141 @@ import random
 import numpy as np
 
 
+def initializer(setup):
+    """
+    initializer function, creates and returns the setup of the task
+
+    Args:
+        setup: integer in [1,2,3], deciding which setup to choose
+
+    Returns:
+        machines: number of machines
+        jobs: list of job assignments to machines (randomly generated)
+        times: processing times, corresponding to jobs
+    """
+
+    if setup == 1:
+        machines = 20
+
+        # for each job, randomly assign one machine
+        jobs = np.random.randint(machines, size=300)
+
+        # processing times
+        processint_times_1 = np.random.randint(low=10, high=1000, size=200)
+        processint_times_2 = np.random.randint(low=100, high=300, size=100)
+        times = np.hstack((processint_times_1, processint_times_2))
+
+        return (machines, jobs, times)
+
+    elif setup == 2:
+        machines = 20
+
+        # for each job, randomly assign one machine
+        jobs = np.random.randint(machines, size=300)
+
+        # processing times
+        processint_times_1 = np.random.randint(low=10, high=1000, size=150)
+        processint_times_2 = np.random.randint(low=400, high=700, size=150)
+        times = np.hstack((processint_times_1, processint_times_2))
+
+        return (machines, jobs, times)
+
+    if setup == 3:
+        machines = 50
+
+        # for each job, randomly assign one machine
+        jobs = np.random.randint(machines, size=101)
+
+        # processing times
+        times = np.empty((101,))
+        # filling it like specified
+        times[:3] = 50
+
+        last = 3
+        value = 51
+        for _ in range(49):
+            times[last:last+2] = value
+            last += 2
+            value += 1
+
+        return (machines, jobs, times)
+
+    raise Exception("[-] 'setup' hast to be either 1, 2 or 3!")
+
+
+# ---
+
+
+def roulette_wheel_selection(fitness, n):
+    """
+    Roulette Wheel Selection (Fitness Proportion Selection)
+
+    Args:
+        fitness: fitness scores
+        n: number of members to be selected
+
+    Returns:
+        indx_list: indexes of members to be selected
+    """
+
+    # calculate standard propabilites in regard to fitness scores
+    sum_of_fitness = np.sum(fitness)
+    probabilities = [fit/sum_of_fitness for fit in fitness]
+    # build cummulative probabilites
+    cum_propabilites = [sum(probabilities[:i]) for i in range(1, len(probabilities)+1)]
+
+    # list of indexes of selected members
+    indx_list = []
+
+    while len(indx_list) != n:
+
+        # generate random number pepresenting the ball in the roulette
+        r = random.uniform(0, 1)
+
+        for indx, prob in enumerate(cum_propabilites):
+            # we found the place the ball fell down
+            if r <= prob:
+                indx_list.append(indx)
+                break
+
+    return indx_list
+
+
+# ---
+
+
+def tournament_selection(fitness, n, s=2, replacement=False):
+    """
+    Tournament Selection (Ordinal Selection)
+
+    Args:
+        fitness: fitness scores
+        n: number of members to be selected
+        s: number of memebers to enter a tournament
+        replacement: is the same member allowed to enter one tournament twice?
+
+    Returns:
+        indx_list: indexes of members to be selected
+    """
+
+    # list of indexes of selected members
+    indx_list = []
+
+    # do n tournaments
+    for _ in range(n):
+        # select candidates for this tournament
+        candidates = np.random.choice(range(len(fitness))
+        # fitness scores of selected candidates
+        candidate_scores = [fitness[indx] for indx in candidates]
+        # get index of biggest score and append to the index list
+        indx_list.append(candidate_scores.index(max(candidate_scores)))
+
+    return indx_list
+
+
+# ---
+
+
 def k_point_crossover(chrom1, chrom2, k=1, swap_p=0.5):
     """
     k Point Crossover
@@ -45,15 +180,12 @@ def k_point_crossover(chrom1, chrom2, k=1, swap_p=0.5):
 
     # k+1 because, e.g. if k=1, we have two sections
     for section in range(k+1):
-        #print(section)
-        # generate number between 0 and 1, responsible for deciding
-        # whether to swap sections
-        r = random.uniform(0, 1)
 
         # iterate through all genes in the current section
         while gene < crossover_indx[section]:
-            # if r is smaller/equal than the swap probability, we want to swap
-            if r <= swap_p:
+            # first section is (in pictures) not swapped and from there on
+            # alternatively
+            if section%2 == 1:
                 offspring1[gene] = chrom2[gene]
                 offspring2[gene] = chrom1[gene]
             # else do not swap
@@ -247,8 +379,10 @@ k = replacement(old, new, fitness_old=old_fit,
 print(k)
 """
 
+""" Testin Roulette
+fitness = [10,2,3,4,5,6]
+n = 2
+roulette_wheel_selection(fitness, n)
+"""
 
 # ---
-
-
-# TODO  selection
