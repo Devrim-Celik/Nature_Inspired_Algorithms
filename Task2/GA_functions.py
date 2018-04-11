@@ -130,7 +130,7 @@ def tournament_selection(fitness, n, s=2, replacement=False):
     # do n tournaments
     for _ in range(n):
         # select candidates for this tournament
-        candidates = np.random.choice(range(len(fitness))
+        candidates = np.random.choice(range(len(fitness)))
         # fitness scores of selected candidates
         candidate_scores = [fitness[indx] for indx in candidates]
         # get index of biggest score and append to the index list
