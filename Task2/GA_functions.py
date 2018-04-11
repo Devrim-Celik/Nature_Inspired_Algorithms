@@ -130,7 +130,8 @@ def tournament_selection(fitness, n, s=2, replacement=False):
     # do n tournaments
     for _ in range(n):
         # select candidates for this tournament
-        candidates = np.random.choice(range(len(fitness)))
+        candidates = np.random.choice(range(len(fitness)), size=s, \
+            replace=replacement)
         # fitness scores of selected candidates
         candidate_scores = [fitness[indx] for indx in candidates]
         # get index of biggest score and append to the index list
@@ -379,10 +380,10 @@ k = replacement(old, new, fitness_old=old_fit,
 print(k)
 """
 
-""" Testin Roulette
+
 fitness = [10,2,3,4,5,6]
 n = 2
-roulette_wheel_selection(fitness, n)
-"""
+print(tournament_selection(fitness, n))
+
 
 # ---
