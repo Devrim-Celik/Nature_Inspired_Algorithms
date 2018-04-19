@@ -427,10 +427,4 @@ k = replacement(old, new, fitness_old=old_fit,
 print(k)
 """
 
-
-fitness = [10,2,3,4,5,6]
-n = 2
-print(tournament_selection(fitness, n))
-
-
 # ---
