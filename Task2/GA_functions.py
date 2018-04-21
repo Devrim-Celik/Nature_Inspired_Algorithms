@@ -13,7 +13,7 @@ def initializer_makespan(setup, size):
 
     Args:
         setup: integer in [1,2,3], deciding which setup to choose
-        size: population size
+        size: number of jobs
 
     Returns:
         machines: number of machines
@@ -190,7 +190,7 @@ def tournament_selection(fitness, n, s=2, replacement=False):
 # ---
 
 
-def k_point_crossover(chrom1, chrom2, k=1, swap_p=0.5):
+def k_point_crossover(chrom1, chrom2, k=1):
     """
     k Point Crossover
 
@@ -198,7 +198,6 @@ def k_point_crossover(chrom1, chrom2, k=1, swap_p=0.5):
         chrom1: chromosome of parent 1
         chrom2: chromosome of parent 2
         k     : number of crossovers
-        swap_p: swapping probability
     Returns:
         offspring1: first offspring
         offspring2: second offspring
@@ -366,7 +365,23 @@ def replacement(old_pop, new_pop, mode="delete-all", n=None,
     """
     # if mode is "delete-all", simply return the new population
     if mode == "delete-all":
-        return new_pop
+        if fitness_old == []:
+            raise ValueError("[!] 'fitness_old' has to be filled!")
+
+        population = np.empty(old_pop.shape)
+
+        # take over all members of new population
+        for i in range(len(new_pop)):
+            population[i] = new_pop[i]
+
+        # list of members sorted from best to worse
+        sorted_members = [member for _, member in sorted(zip(fitness_old, old_pop), key=lambda pair: -pair[0])][:n]
+
+        # fill up rest with best of old population
+        for i in range(len(new_pop), len(old_pop)):
+            population[i] = sorted_members[i-len(new_pop)]
+
+        return population
 
     # if not, check if n was supplied
     if n is None:
