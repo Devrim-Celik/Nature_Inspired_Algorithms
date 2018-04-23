@@ -6,15 +6,45 @@ combination or mutation functions
 import random
 import numpy as np
 
+# helper function
+def genereate_ordered(size, machines, times):
+        sorted_indexes = [indx for _, indx in sorted(zip(times, range(len(times))), key=lambda pair: pair[0])]
+        population = np.empty(shape=(size, len(times)))
+        # todo since all members are equal, all chirdren will be equa. do some random shit
+        for member in range(population.shape[0]):
+
+            indx_machine = -1
+            zero_to_hero = True
+            for indx_s_b in sorted_indexes:
+
+                if zero_to_hero:
+                    indx_machine += 1
+                else:
+                    indx_machine -= 1
+
+
+                if indx_machine == machines:
+                    zero_to_hero = False
+                    indx_machine -= 1
+                elif indx_machine == -1:
+                    zero_to_hero = True
+                    indx_machine += 1
+
+
+                population[member, indx_s_b] = indx_machine
+
+        return population
+
 # TODO add population size
-def initializer_makespan(setup, size):
+def initializer_makespan(setup, size, ordered=False):
     """
     initializer function, creates and returns the setup of the task
 
     Args:
         setup: integer in [1,2,3], deciding which setup to choose
         size: number of jobs
-
+        ordered: whether initial assignments are random or have some
+            structure in them
     Returns:
         machines: number of machines
         jobs: list of job assignments to machines (randomly generated)
@@ -24,26 +54,35 @@ def initializer_makespan(setup, size):
     if setup == 1:
         machines = 20
 
-        # for each job, randomly assign one machine
-        population = np.random.randint(machines, size=(size, 300))
-
         # processing times
         processint_times_1 = np.random.randint(low=10, high=1000, size=200)
         processint_times_2 = np.random.randint(low=100, high=300, size=100)
         times = np.hstack((processint_times_1, processint_times_2))
+
+        if ordered:
+            population = genereate_ordered(size, machines, times)
+        else:
+            # for each job, randomly assign one machine
+            population = np.random.randint(machines, size=(size, len(times)))
+
+
 
         return (machines, population, times)
 
     elif setup == 2:
         machines = 20
 
-        # for each job, randomly assign one machine
-        population = np.random.randint(machines, size=(size, 300))
-
         # processing times
         processint_times_1 = np.random.randint(low=10, high=1000, size=150)
         processint_times_2 = np.random.randint(low=400, high=700, size=150)
         times = np.hstack((processint_times_1, processint_times_2))
+
+
+        if ordered:
+            population = genereate_ordered(size, machines, times)
+        else:
+            # for each job, randomly assign one machine
+            population = np.random.randint(machines, size=(size, len(times)))
 
         return (machines, population, times)
 
@@ -65,6 +104,13 @@ def initializer_makespan(setup, size):
             times[last:last+2] = value
             last += 2
             value += 1
+
+
+        if ordered:
+            population = genereate_ordered(size, machines, times)
+        else:
+            # for each job, randomly assign one machine
+            population = np.random.randint(machines, size=(size, len(times)))
 
         return (machines, population, times)
 
@@ -133,6 +179,7 @@ def roulette_wheel_selection(fitness, n):
 
     # calculate standard propabilites in regard to fitness scores
     sum_of_fitness = np.sum(fitness)
+
     probabilities = [fit/sum_of_fitness for fit in fitness]
     # build cummulative probabilites
     cum_propabilites = [sum(probabilities[:i]) for i in range(1, len(probabilities)+1)]

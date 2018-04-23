@@ -11,22 +11,23 @@ if "__main__"==__name__:
     if POPULATION_SIZE % 2 == 1:
         raise ValueError("[!] 'POPULATION_SIZE' has to be an even number!")
 
-    SETUP = [1, 2, 3]
+    # SETUP = [1, 2, 3]
+    SETUP = [1]
     SETUP_SELECTION = ["Roulette", "Tournament"]
     setup_selection = SETUP_SELECTION[0]
     SETUP_CROSSOVER = ["k-point", "Uniform"]
     setup_crossover = SETUP_CROSSOVER[0]
 
-    ITERATIONS = 200
+    ITERATIONS = 50
     # number of best memebrs to save in history
-    SAVE_NR_BEST = 5
+    SAVE_NR_BEST = 200
     history = np.zeros((ITERATIONS, SAVE_NR_BEST))
 
     for setup in SETUP:
 
         # --------------------- Initialization
         # get starting population of size: (POPULATION_SIZE x NR_JOBS)
-        nr_machines, population, times = initializer_makespan(setup, POPULATION_SIZE)
+        nr_machines, population, times = initializer_makespan(setup, POPULATION_SIZE, ordered=True)
 
         # possible allele values
         allele_list = list(range(nr_machines))
@@ -74,7 +75,7 @@ if "__main__"==__name__:
                 # save created children in children array
                 # TODO mutation probability
                 children[i], children[i+1] = \
-                    mutation(off1, allele_list), mutation(off2, allele_list)
+                    mutation(off1, allele_list, p_m=0.1), mutation(off2, allele_list, p_m=0.1)
 
             # ---------------------- Replacement
             population = replacement(population, children, mode="delete-all", n=None,
