@@ -4,30 +4,36 @@ import numpy as np
 
 if "__main__"==__name__:
 
-    # TODO iterate over different populatoin sizes, probabilites, modules,
-    # ITERATIONS sizes
+    POPULATION_SIZE = 20
+    if POPULATION_SIZE % 4 != 0:
+        raise ValueError("[!] 'POPULATION_SIZE' has to be dividedable by 4!")
 
-    POPULATION_SIZE = 200
-    if POPULATION_SIZE % 2 == 1:
-        raise ValueError("[!] 'POPULATION_SIZE' has to be an even number!")
-
-    # SETUP = [1, 2, 3]
-    SETUP = [1]
+    # possible variables to change concerning modules and test
+    SETUP = [1, 2, 3]
     SETUP_SELECTION = ["Roulette", "Tournament"]
-    setup_selection = SETUP_SELECTION[0]
     SETUP_CROSSOVER = ["k-point", "Uniform"]
-    setup_crossover = SETUP_CROSSOVER[0]
+    SETUP_REPLACEMENT = ["delete-all", "steady-state"]
+    SETUP_MUTATION = ["default", "swap"]
+    # selected ones
+    setup_selection = SETUP_SELECTION[0]
+    setup_crossover = SETUP_CROSSOVER[1]
+    setup_replacement = SETUP_REPLACEMENT[0]
+    setup_mutation = SETUP_MUTATION[0]
 
-    ITERATIONS = 50
+    ITERATIONS = 200
     # number of best memebrs to save in history
-    SAVE_NR_BEST = 200
+    SAVE_NR_BEST = 10
     history = np.zeros((ITERATIONS, SAVE_NR_BEST))
+
+    # figure details
+    plt.figure(figsize=(20,10))
+    plt.suptitle("Population Size: {}; Selection: {}; Crossover: {}; Replacement: {}; Mutation: {}".format(POPULATION_SIZE, setup_selection, setup_crossover, setup_replacement, setup_mutation))
 
     for setup in SETUP:
 
         # --------------------- Initialization
         # get starting population of size: (POPULATION_SIZE x NR_JOBS)
-        nr_machines, population, times = initializer_makespan(setup, POPULATION_SIZE, ordered=True)
+        nr_machines, population, times = initializer_makespan(setup, POPULATION_SIZE)
 
         # possible allele values
         allele_list = list(range(nr_machines))
@@ -46,8 +52,6 @@ if "__main__"==__name__:
             # --------------------- Selection
             # select members given a particular selection algorithm
             if setup_selection == "Roulette":
-                # TODO because all fitness scores are pretty similar
-                # (considering they are all HUGE) this may not be the best
                 # selection algrithm
                 selected_indx = roulette_wheel_selection(fitness_scores, POPULATION_SIZE//2)
 
@@ -66,25 +70,26 @@ if "__main__"==__name__:
                 # parent one is in selected_members in row 1, parent two in
                 # row 2 ...
                 if setup_crossover == "k-point":
-                    # TODO change k
                     off1, off2 = k_point_crossover(selected_members[i], selected_members[i+1])
                 elif setup_crossover == "Uniform":
-                    pass
+                    off1, off2 = uniform_crossover(selected_members[i], selected_members[i+1])
 
                 # --------------------- Mutation
                 # save created children in children array
                 # TODO mutation probability
                 children[i], children[i+1] = \
-                    mutation(off1, allele_list, p_m=0.1), mutation(off2, allele_list, p_m=0.1)
+                    mutation(off1, allele_list, mode=setup_mutation, p_m=0.05), mutation(off2, allele_list, mode=setup_mutation, p_m=0.05)
 
             # ---------------------- Replacement
-            population = replacement(population, children, mode="delete-all", n=None,
-                based_on_fitness=True, fitness_old=fitness_scores)
+            population = replacement(population, children, mode=setup_replacement, n=children.shape[0],
+                based_on_fitness=True, fitness_old=fitness_scores, fitness_new=evaluation_makespan(children, times, nr_machines))
 
 
-        plt.figure()
-        plt.title("Plot of the best {} members of the populations throught time for setup {}".format(SAVE_NR_BEST, setup))
+        plt.subplot(130+setup)
+        plt.title("Task {}".format(setup))
         plt.plot(history)
         plt.xlabel("Generations")
-        plt.ylabel("Maximum Time Duration of all Machines")
-        plt.show()
+        if setup == 1:
+            plt.ylabel("Maximum Time Duration of all Machines")
+    #plt.show()
+    plt.savefig("GA_{}_{}_{}_{}_{}.png".format(POPULATION_SIZE, setup_selection, setup_crossover, setup_mutation, setup_replacement))

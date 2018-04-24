@@ -6,43 +6,55 @@ combination or mutation functions
 import random
 import numpy as np
 
-# helper function
+
 def genereate_ordered(size, machines, times):
-        sorted_indexes = [indx for _, indx in sorted(zip(times, range(len(times))), key=lambda pair: pair[0])]
-        population = np.empty(shape=(size, len(times)))
-        # todo since all members are equal, all chirdren will be equa. do some random shit
-        for member in range(population.shape[0]):
+    """
+    Helper function which initializes a population on the following bases:
+    * Sort all the jobs by their required time (to fulfill)
+    * Start assigning the "shortest" job to machine 0 (the starting point),
+        the second shortest to 1 and so on until you assigned a job to machine
+        n. At this point start from machine n and go down to zero (still
+        assigning jobs based on their lengths)
+    """
 
-            indx_machine = -1
-            zero_to_hero = True
-            for indx_s_b in sorted_indexes:
+    # indexes of the jobs, sorted by the length
+    sorted_indexes = [indx for _, indx in sorted(zip(times, range(len(times))), key=lambda pair: pair[0])]
+    population = np.empty(shape=(size, len(times)))
 
-                if zero_to_hero:
-                    indx_machine += 1
-                else:
-                    indx_machine -= 1
+    for member in range(population.shape[0]):
+        # to have variation between different members, have a random starting
+        # point
+        indx_machine = random.randint(-1, 18)
+        zero_to_hero = True
 
+        for indx_s_b in sorted_indexes:
 
-                if indx_machine == machines:
-                    zero_to_hero = False
-                    indx_machine -= 1
-                elif indx_machine == -1:
-                    zero_to_hero = True
-                    indx_machine += 1
+            # responsible for iterating (from 0 to n --> increase; from n to 0
+            # --> decrease)
+            if zero_to_hero:
+                indx_machine += 1
+            else:
+                indx_machine -= 1
 
+            # responsible for chaning from increase to decrease and vice versa
+            if indx_machine == machines:
+                zero_to_hero = False
+                indx_machine -= 1
+            elif indx_machine == -1:
+                zero_to_hero = True
+                indx_machine += 1
 
-                population[member, indx_s_b] = indx_machine
+            population[member, indx_s_b] = indx_machine
 
-        return population
+    return population
 
-# TODO add population size
 def initializer_makespan(setup, size, ordered=False):
     """
     initializer function, creates and returns the setup of the task
 
     Args:
         setup: integer in [1,2,3], deciding which setup to choose
-        size: number of jobs
+        size: population size
         ordered: whether initial assignments are random or have some
             structure in them
     Returns:
@@ -59,13 +71,14 @@ def initializer_makespan(setup, size, ordered=False):
         processint_times_2 = np.random.randint(low=100, high=300, size=100)
         times = np.hstack((processint_times_1, processint_times_2))
 
+        # in case you want the ordered version...
         if ordered:
+            # consult helper function
             population = genereate_ordered(size, machines, times)
+        # otherwise go full random
         else:
             # for each job, randomly assign one machine
             population = np.random.randint(machines, size=(size, len(times)))
-
-
 
         return (machines, population, times)
 
@@ -333,13 +346,15 @@ def uniform_crossover(chrom1, chrom2, swap_p=0.6):
 # ---
 
 
-def mutation(chrom, allele_list, p_m=0.05):
+def mutation(chrom, allele_list, mode="default", p_m=0.05):
     """
     Default Mutation
 
     Args:
         chrom      : chromosome list
         allele_list: list of possible allele to mutate to
+        mode       : either 'default' or 'swap'. note in swap we randomly swap
+                        the values of two genes
         p_m        : mutation probability
     Returns:
         chrom      : mutated chromose list
@@ -352,8 +367,15 @@ def mutation(chrom, allele_list, p_m=0.05):
 
         # if r is smaller/equal the mutation probability, mutate!
         if r <= p_m:
-            # choose random allele from list of possible alleles
-            chrom[i] = random.choice(allele_list)
+            if mode == "default":
+                # choose random allele from list of possible alleles
+                chrom[i] = random.choice(allele_list)
+            elif mode == "swap":
+                # generate to random indices
+                idx = range(len(chrom))
+                i1, i2 = random.sample(idx,2)
+                # swap two alleles (randomly)
+                chrom[i1], chrom[i2] = chrom[i2], chrom[i1]
 
     return chrom
 
@@ -397,11 +419,11 @@ def replacement(old_pop, new_pop, mode="delete-all", n=None,
         old_pop: old population
         new_pop: new population
         mode: chosen from options: ['delete-all', 'steady-state']
-            * 'delete-all': replace old population through new one
-            * 'steady-state'; replace n members of the old population by n
+            * 'delete-all': replace part of old population through new ones
+            * 'steady-state': replace n members of the old population by n
                 members of the new population
         n: number of members to be replaced if 'stead-state' is chosen as mode
-        based_on_fitness: boolea, if chosen, you will replace the n worst
+        based_on_fitness: boolean, if chosen, you will replace the n worst
             members of the old population the n best members of the new
             population
         fitness_old: corresponding fitness values for the old population
@@ -410,7 +432,7 @@ def replacement(old_pop, new_pop, mode="delete-all", n=None,
     Returns:
         population: replaced population
     """
-    # if mode is "delete-all", simply return the new population
+
     if mode == "delete-all":
         if fitness_old == []:
             raise ValueError("[!] 'fitness_old' has to be filled!")
@@ -453,6 +475,7 @@ def replacement(old_pop, new_pop, mode="delete-all", n=None,
         check if fitness lsits are defined
         build two correpsonding lists of indx and values to replace
         """
+
         if len(fitness_old) != len(old_pop) or len(fitness_new) != len(new_pop):
             raise Exception("""[-] Both 'fitness_old' and 'fitness_new' need to be
             the same length as 'old_pop' and 'new_pop'""")
@@ -475,18 +498,5 @@ def replacement(old_pop, new_pop, mode="delete-all", n=None,
         population[indx] = val
 
     return population
-
-
-"""
-# SETUP for testing steady-state mode based on fitness
-old = ["a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"]
-old_fit = [1,2,3,4,5,6,7,8]
-new = ["a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2"]
-new_fit = [10,20,30,40,50,60,70,80]
-
-k = replacement(old, new, fitness_old=old_fit,
-    fitness_new=new_fit,n=3,mode="steady-state")
-print(k)
-"""
 
 # ---
