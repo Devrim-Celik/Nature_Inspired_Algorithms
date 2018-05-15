@@ -20,15 +20,21 @@ S = [c for c in range(150)]
 D_HEURISTIC_0 = {'alpha': 1, 'beta': 0}
 D_HEURISTIC_1 = {'alpha': 1, 'beta': 1}
 
-# Define the initial pheromone value and its evaporation and intensification
-# rates
-PH_INIT_VAL = 1  # Not used yet, instead np.ones
-NR_ITERATIONS = 50
-E_RATE = 0.1
-I_RATE = 0.1
 
+def TSP_ACO(cost_matrix, nr_ants, alpha, beta, e_rate, i_rate):
+    """
+    Ant Colony Optimization on TSP problem
 
-def TSP_ACO_ALT(cost_matrix, nr_ants, alpha, beta, e_rate, i_rate):
+    Args
+        cost_matrix     cost matrix of tsp problem
+        nr_ants         number of ants in the colony
+        alpha           parameter
+        beta            parameter
+        e_rate          evaporation parameter
+        i_rate          intensification parameters
+    Returns
+        Cost of the cheapest path (and saves figures)
+    """
     # since cost matrix is always quadratic...
     nr_cities = cost_matrix.shape[0]
     # initialize pheromone matrix with ones, (except diagonal)
@@ -105,6 +111,16 @@ def TSP_ACO_ALT(cost_matrix, nr_ants, alpha, beta, e_rate, i_rate):
     return history[-1]
 
 def find_best_ant(path, cost_matrix, history):
+    """
+    Given all ant paths, find the best (shortest, cheapest) and path
+
+    Args
+        path            paths of all ants
+        cost_matrix     cost matrix to calculate cost of paths
+        history         history, to save best path value
+    Returns
+        Ant indice with lowest/shortest path
+    """
     cost_list = []
 
     for ant in range(path.shape[0]):
@@ -119,7 +135,20 @@ def find_best_ant(path, cost_matrix, history):
 
 
 def probability_list(i, S, pheromone, alpha, heuristic, beta, include_heur=True):
+    """
+    generate list of probabilites for next possible city to visit
 
+    Args
+        i               current city
+        S               list of possible next citites
+        pheremone       pheremone matrix
+        alpha           alpha param
+        heuristic       heuristic matrix
+        beta            beta param
+        include_heur    should you include the heuristic?
+    Returns
+        list of probabilites, corresponding to the cities in S
+    """
     if include_heur:
         prob_list = [pheromone[i,j]**alpha * heuristic[i,j]**beta for j in S]
     else:
@@ -135,7 +164,7 @@ if SURFACE:
     kk = 0
     for e in [0.2, 0.4, 0.6, 0.8, 1]:
         for i in [0.2, 0.4, 0.6, 0.8, 1]:
-                end = TSP_ACO_ALT(c_matrix_01, 5, D_HEURISTIC_0['alpha'], D_HEURISTIC_1['beta'], e, i)
+                end = TSP_ACO(c_matrix_01, 5, D_HEURISTIC_0['alpha'], D_HEURISTIC_1['beta'], e, i)
                 my_np[kk] = np.array([e, i, end])
                 kk += 1
                 print(kk)
@@ -143,4 +172,4 @@ if SURFACE:
 else:
     e = 0.2
     i = 1
-    end = TSP_ACO_ALT(c_matrix_01, 5, D_HEURISTIC_0['alpha'], D_HEURISTIC_1['beta'], e, i)
+    end = TSP_ACO(c_matrix_01, 5, D_HEURISTIC_0['alpha'], D_HEURISTIC_1['beta'], e, i)
