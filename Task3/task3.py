@@ -23,11 +23,12 @@ D_HEURISTIC_1 = {'alpha': 1, 'beta': 1}
 # Define the initial pheromone value and its evaporation and intensification
 # rates
 PH_INIT_VAL = 1  # Not used yet, instead np.ones
+NR_ITERATIONS = 50
 E_RATE = 0.1
 I_RATE = 0.1
-NR_ITERATIONS = 50
 
-def TSP_ACO_ALT(cost_matrix, nr_ants, alpha, beta):
+
+def TSP_ACO_ALT(cost_matrix, nr_ants, alpha, beta, e_rate, i_rate):
     # since cost matrix is always quadratic...
     nr_cities = cost_matrix.shape[0]
     # initialize pheromone matrix with ones, (except diagonal)
@@ -82,7 +83,7 @@ def TSP_ACO_ALT(cost_matrix, nr_ants, alpha, beta):
         for i in range(nr_cities):
             for j in range(nr_cities):
                 # using your E_RATE,
-                pheromones[i, j] = (1 - E_RATE) * pheromones[i,j]
+                pheromones[i, j] = (1 - e_rate) * pheromones[i,j]
 
         ########################## INTENSIFICATION
         # first, find ant with shortest/cheapest path
@@ -93,15 +94,15 @@ def TSP_ACO_ALT(cost_matrix, nr_ants, alpha, beta):
             i = path[fast_ant, city]         # from city
             j = path[fast_ant, city+1]       # to city
             # intesify by I_RATE
-            pheromones[i, j] += I_RATE
-
-        # TODO RETURN SOMETHING
+            pheromones[i, j] += i_rate
 
 
     plt.figure("ANT PLOT", figsize=(20, 10))
     plt.plot(history)
-    plt.savefig("PLOT2.png")
-    plt.show()
+    plt.savefig("pictures/PLOT_ants_{}_e_{}_i_{}.png".format(nr_ants, e_rate, i_rate))
+    #plt.show()
+
+    return history[-1]
 
 def find_best_ant(path, cost_matrix, history):
     cost_list = []
@@ -127,4 +128,19 @@ def probability_list(i, S, pheromone, alpha, heuristic, beta, include_heur=True)
     prob_list = [float(i/sum(prob_list)) for i in prob_list]
     return prob_list
 
-TSP_ACO_ALT(c_matrix_01, 50  , D_HEURISTIC_0['alpha'], D_HEURISTIC_0['beta'])
+SURFACE = False
+
+if SURFACE:
+    my_np = np.zeros((25, 3))
+    kk = 0
+    for e in [0.2, 0.4, 0.6, 0.8, 1]:
+        for i in [0.2, 0.4, 0.6, 0.8, 1]:
+                end = TSP_ACO_ALT(c_matrix_01, 5, D_HEURISTIC_0['alpha'], D_HEURISTIC_1['beta'], e, i)
+                my_np[kk] = np.array([e, i, end])
+                kk += 1
+                print(kk)
+    np.save("setup.npy", my_np)
+else:
+    e = 0.2
+    i = 1
+    end = TSP_ACO_ALT(c_matrix_01, 5, D_HEURISTIC_0['alpha'], D_HEURISTIC_1['beta'], e, i)
