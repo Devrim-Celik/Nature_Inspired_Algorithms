@@ -55,11 +55,27 @@ surface_case = false
 if single_case
     population, avg, best, worst = differential_evolution(population_size[2],
     minimum_values, maximum_values, F[1], Cr[3], profit_fitness,
-    nr_generations, modules[1], true)
+    nr_generations, modules[2], true)
 end
 
 if surface_case
-    println("NOT IMPLEMENTED")
+    # create array to save the value for different setups
+    # 1.dimension: F dimension with length(F)
+    # 2.dimension: Cr diension with lenth(Cr)
+    # 3.dimension: size 3 --> for average, best & worst value for this run
+    surface_data = zeros(length(F), length(Cr), 3)
+    # NOTE: columns first ;)
+    for indx_Cr in 1:length(Cr)
+        for indx_F in 1:length(F)
+            population, avg, best, worst = differential_evolution(
+            population_size[2], minimum_values, maximum_values, F[indx_F],
+            Cr[indx_Cr], profit_fitness, nr_generations, modules[2], true)
+            # set corresponding data
+            surface_data[indx_F, indx_Cr, :] = avg, best, worst
+        end
+    end
+    println(surface_data)
+    println(surface_data[1, 3, :])
     # TODO Surface: F vs Cr for both binomial and exponential
     # TODO Then compare binomial vs exponential
 end

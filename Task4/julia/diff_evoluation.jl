@@ -1,17 +1,16 @@
-#Pkg.add("StatsBase") TODO takes forever, have to include?
-#Pkg.add("Plots")
-
-# TODO its right, that if x = ones(3,4)
-# x[1] != x[1,:]
-
-# TODO using modules dauer alles EWIG, was geht?
 using StatsBase
 using Plots
+#using ProfileView # TODO what to do with this shiet
 
-# TODO welche ist "beste"?
-pyplot()
+gr()
+# für plots gr() oder plotlyjs() (klappt nicht 0.6)
+# TODO show for gr()
+
+#julia  multiple dispatch
 
 println("[+] MODULES LOADED")
+
+# TODO --> abbruchbedingung, wenn sich werte nicht ändern
 
 # ---------------------------------------------------------------------------- #
 function de_initializer(pop_size::Int64, minimum_values, maximum_values)
@@ -29,8 +28,6 @@ function de_initializer(pop_size::Int64, minimum_values, maximum_values)
 
     target = zeros(pop_size, length(minimum_values))
 
-    # TODO columns first like this?
-    # go through all possible genomes
     for component in 1:length(minimum_values)
         # go through all members
         for member in 1:pop_size
@@ -105,13 +102,65 @@ function de_crossover(target, donor, Cr::Float64, mode)
     trial = zeros(size(target))
 
     if mode == "EXPONENTIAL"
+        """
+        idea is to get a random number in [1, D] (D = number of components)
+        which we will call n, and a number L, which is drawn from [1, D]
+        according to the following pseudocode
+
+        L = 0 DO
+            {
+            L = L + 1
+            } WHILE ((rand(0, 1) <= Cr) AND (L<=D))
+
+        Meaning, L will start at 0, and will be incremented the first time for
+        sure (due to being a do-while) loop. The next increment to L = 2
+        will happen with a probability of Cr (if rand(0,1) <= Cr). The next
+        increment (and thus L = 3) will again happen with a probability of Cr
+        (given that L is already 2), so the probability of L = k is Crᵏ⁻¹
+        (again, -1 due to the fact, that the first increment if "for free");
+        thus called exponential.
+
+        Then iterate in [n, n+L] and take the modulo of this indice and indices
+        for componenets to be changed (modulo --> "circular fashion").
+        """
+        # TODO n and L drawn new for eadch population or each member?
+
         # starting point for crossover
         n = rand(1:size(target)[2])
+
         # number of components the donor vector actually contributes to the
         # trial vector
-        L = rand(1:size(target)[2])
+        L = 1
+        while rand() <= Cr && L<size(target)[2]
+            L += 1
+        end
 
-        #TODO NOT FINISHED
+        # now that we have a starting point n and a Length of a section L
+        # start the crossover
+
+        # our starting point is the target population
+        trial = copy(target)
+
+        # for each member ...
+        # now, iterate through our range [n, n+L] and change al values
+        # with indice, which is in this range modulo number of compartments
+        for component in n:n+L
+
+            # calculate indx, so its in a  ciruclar fasion
+            indx = component%size(target)[2]
+            # NOTE BUG: If we have, that n+L at one point is equal to D
+            # (number of components) than the modulo is 0 and thus
+            # julia throws an error (indice start 1 ), no better way
+            # for now, than to say:
+            if indx == 0
+                indx = size(target)[2]
+            end
+
+            for member in 1:size(target)[1]
+                trial[member, indx] = donor[member, indx]
+            end
+        end
+
 
     elseif mode == "BINOMIAL"
         # choose one component, which will be taken from the donor population
@@ -277,7 +326,7 @@ function differential_evolution(pop_size::Int64, minimum_values, maximum_values,
         # save figures
         savefig("plots/differential_evolution_final_$(pop_size)_$(F)_$(Cr)_$(nr_iterations)_$(crossover_mode).png")
         # show plot
-        show()
+        #show()
     end
 
 
