@@ -1,6 +1,10 @@
 include("task_types.jl")
 include("diff_evoluation.jl")
 
+#using JLD
+using Plots
+gr()
+
 # ---------------------------------------------------------------------------- #
 # SETUP
 plant1 = Plant(50000.0, 10000.0, 100.0)
@@ -46,11 +50,11 @@ maximum_values      =   [1000000000, 1000000000, 1000000000, 1000000000,
                             1000000000, 1000000000, 1, 1, 1]
 F                   =   LinSpace(0.4, 1.0, 13)      # usually in [0.4 ; 1]
 Cr                  =   LinSpace(0.0, 0.5, 11)      # usually smaller values
-nr_generations      =   100
+nr_generations      =   10
 modules             =   ["BINOMIAL", "EXPONENTIAL"]
 # ---------------------------------------------------------------------------- #
 single_case = true
-surface_case = false
+surface_case = true
 
 if single_case
     population, avg, best, worst = differential_evolution(population_size[2],
@@ -69,16 +73,19 @@ if surface_case
         for indx_F in 1:length(F)
             population, avg, best, worst = differential_evolution(
             population_size[2], minimum_values, maximum_values, F[indx_F],
-            Cr[indx_Cr], profit_fitness, nr_generations, modules[2], true)
+            Cr[indx_Cr], profit_fitness, nr_generations, modules[2], false)
+
             # set corresponding data
-            surface_data[indx_F, indx_Cr, :] = avg, best, worst
+            surface_data[indx_F, indx_Cr, :] = [avg[end], best[end], worst[end]]
         end
     end
-    println(surface_data)
-    println(surface_data[1, 3, :])
-    # TODO Surface: F vs Cr for both binomial and exponential
-    # TODO Then compare binomial vs exponential
-end
 
-println("Average[$(avg[end])], Best[$(best[end])] & Worst[$(worst[end])]")
-# TODO also look at the values it took--> what if it is the maximume everywhere...
+    """
+    # save parameters for 3D plot
+    save("param/surface_parameter.jld", "F", F, "Cr", Cr, "Fit_Avg",
+    surface_data[:, :, 1], "Fit_Best", surface_data[:, :, 2], "Fit_Worst",
+    surface_data[:, :, 3], )
+    """
+    surface(F, Cr, surface_data[:, :, 1])
+    savefig("here.png")
+end
