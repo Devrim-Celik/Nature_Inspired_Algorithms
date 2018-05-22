@@ -48,6 +48,10 @@ population_size     =   [50, 100, 200, 500, 1000]
 minimum_values      =   [0, 0, 0, 0, 0, 0, 0, 0, 0]
 maximum_values      =   [1000000000, 1000000000, 1000000000, 1000000000,
                             1000000000, 1000000000, 1, 1, 1]
+# NOTE This parameter is the exploration/convergence parameter:
+    # For bigger values, we cover a bigger space [higher exploration]
+    # But if you want to reach a certain point (local optimum) you need smaller
+    # vectors (smaller F since its scaling this vector) [faster convergence]
 F                   =   LinSpace(0.4, 1.0, 13)      # usually in [0.4 ; 1]
 Cr                  =   LinSpace(0.0, 0.5, 11)      # usually smaller values
 nr_generations      =   10

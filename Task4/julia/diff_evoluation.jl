@@ -48,7 +48,10 @@ function de_mutation(target, F::Float64, minimum_values, maximum_values)
 
     Args
         target      target population
-        F::Float64  mutation parameter (whats its influence)
+        F::Float64          exploration/convergence parameter
+                                (scaling of donor vector parts)
+        minimum_values      array with minimal values for component range
+        maximum_values      array with maximal values for component range
 
     Returns
         donor       donor population
