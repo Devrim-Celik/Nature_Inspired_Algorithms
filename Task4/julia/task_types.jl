@@ -30,7 +30,7 @@ function calculate_cost(x::Float64, plant::Plant)
         return 0
     # if required enery > maximum number of plant type * energy produced by each
     elseif x > plant.kWh * plant.maximum
-        return Inf
+        return 100 # Inf
     # else we are "fine"
     else
         return ceil(x / plant.kWh) * plant.cost

@@ -54,7 +54,7 @@ maximum_values      =   [1000000000, 1000000000, 1000000000, 1000000000,
     # vectors (smaller F since its scaling this vector) [faster convergence]
 F                   =   LinSpace(0.4, 1.0, 13)      # usually in [0.4 ; 1]
 Cr                  =   LinSpace(0.0, 0.5, 11)      # usually smaller values
-nr_generations      =   10
+nr_generations      =   100
 modules             =   ["BINOMIAL", "EXPONENTIAL"]
 # ---------------------------------------------------------------------------- #
 single_case = true

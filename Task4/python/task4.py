@@ -4,7 +4,7 @@ Module for executing Differential Evolution Algorithm on Task 4
 
 import math
 import numpy as np
-
+from de_functions import differential_evolution
 ################################################################################
 # --- CLASSES REQUIRED FOR TASK
 ################################################################################
@@ -56,7 +56,7 @@ def calculate_cost(x, plant):
         return 0
     # if required enery > maximum number of plant type * energy produced by each
     elif x > plant.kWh * plant.maximum:
-        return float("infinity")
+        return 10000000000000 #float("infinity")
     # else we are "fine"
     return math.ceil(x / plant.kWh) * plant.cost
 
@@ -132,7 +132,10 @@ if __name__=="__main__":
                                 1000000000, 1000000000, 1, 1, 1]
     F                   =   np.linspace(0.4, 1.0, 13)   # usually in [0.4 ; 1]
     Cr                  =   np.linspace(0.0, 0.5, 11)   # usually smaller values
-    nr_generations      =   10
+    nr_generations      =   1000
     modules             =   ["BINOMIAL", "EXPONENTIAL"]
 
     #
+    population, avg, best, worst = differential_evolution(population_size[3],
+    minimum_values, maximum_values, F[0], Cr[2], profit_fitness,
+    nr_generations, modules[1], True)
