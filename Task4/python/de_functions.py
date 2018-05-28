@@ -55,10 +55,10 @@ def de_mutation(target, individual, F, minimum_values, maximum_values):
     np_index = [i for i in range(len(target))]
 
     donors = random.sample(np_index,3)
-    
+
     while any(individual == i for i in donors):
         donors = random.sample(np_index,3)
-    
+
     donor = (target[donors[2]] + F* (target[donors[1]] - target[donors[0]]))
 
     #if the values are bigger(smaller) than the max(min) values, replace them by the max(min)
@@ -118,10 +118,10 @@ def de_crossover(target, individual, donor, Cr, mode):
     elif mode == "BINOMIAL":
         # choose one component, which will be taken from the donor vector
         # for sure, to get some "mutation".
-        
+
         j_rand = random.choice(range(target.shape[1]))
 
-        
+
         for component in range(target.shape[1]):
             # if we hit the crossover probability or we arrived
             # at our selected component for this member, use
@@ -163,7 +163,7 @@ def de_selection(target,individual, trial, fitness_function):
 ################################################################################
 # ALL TOGETHER
 def differential_evolution(pop_size, minimum_values, maximum_values,
-    F, Cr, fitness_function, crossover_mode, save_plots):
+    F, Cr, fitness_function, pop_iterations, crossover_mode, save_plots):
     """
     Differential Evolution Algorithm
     Args
@@ -175,6 +175,7 @@ def differential_evolution(pop_size, minimum_values, maximum_values,
         fitness_function                fitness_function
                 NOTE: fitness function needs to take one member of the
                     population in, and return a score (higher = better)
+        pop_iterations                  how often to go through the population
         crossover_mode                  which crossover mode
                 NOTE: either "EXPONENTIAL" / "BINOMIAL"
         save_plots                      create, save and display plots?
@@ -197,11 +198,11 @@ def differential_evolution(pop_size, minimum_values, maximum_values,
     # generate initial taret population
     target = de_initializer(pop_size, minimum_values, maximum_values)
     iter = 0
-    
-    while iter < 4*pop_size:
-        for individual in range(len(target)):
-            print("Iteration Nr", iter)
 
+    while iter < pop_iterations * pop_size:
+        print("Generation Nr", int(iter/pop_size))
+
+        for individual in range(len(target)):
             # ------------------------------------------------------ #
             # generate donor population
             donor = de_mutation(target, individual, F, minimum_values, maximum_values)
@@ -210,7 +211,7 @@ def differential_evolution(pop_size, minimum_values, maximum_values,
             # use selection, to find new best members
             target = de_selection(target, individual, trial, fitness_function)
             # ------------------------------------------------------ #
-            
+
             iter += 1
 
             # set average to 0
@@ -220,28 +221,28 @@ def differential_evolution(pop_size, minimum_values, maximum_values,
             # set worst to plus infinity
             worst = float("infinity")
 
-            # go through all members
-            for member in range(pop_size):
-                # add fitness scores on average variable
-                average += fitness_function(target[member])
+        # go through all members
+        for member in range(pop_size):
+            # add fitness scores on average variable
+            average += fitness_function(target[member])
 
-                # if fitness score of current member is better than the
-                # current best ...
-                if fitness_function(target[member]) > best:
-                    # ...set it to the new best
-                    best = fitness_function(target[member])
+            # if fitness score of current member is better than the
+            # current best ...
+            if fitness_function(target[member]) > best:
+                # ...set it to the new best
+                best = fitness_function(target[member])
 
-                # if fitness score of current member is worse than the current
-                # worst ....
-                if fitness_function(target[member]) < worst:
-                    # set it to the new worst
-                    worst = fitness_function(target[member])
-        
-            # divide average
-            average /= pop_size
-            print(average)
-            average_history.append(average)
-            best_history.append(best)
-            worst_history.append(worst)
+            # if fitness score of current member is worse than the current
+            # worst ....
+            if fitness_function(target[member]) < worst:
+                # set it to the new worst
+                worst = fitness_function(target[member])
+
+        # divide average
+        average /= pop_size
+        #print(average)
+        average_history.append(average)
+        best_history.append(best)
+        worst_history.append(worst)
 
     return target, average_history, best_history, worst_history

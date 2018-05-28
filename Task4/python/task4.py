@@ -4,7 +4,12 @@ Module for executing Differential Evolution Algorithm on Task 4
 
 import math
 import numpy as np
+import os
+import matplotlib.pyplot as plt
+from mpl_toolkits import mplot3d
+
 from de_functions import differential_evolution
+
 ################################################################################
 # --- CLASSES REQUIRED FOR TASK
 ################################################################################
@@ -109,6 +114,14 @@ def profit_fitness(setup):
 # --- MAIN - SETUP
 ################################################################################
 if __name__=="__main__":
+    SINGLE = True
+    SURFACE = False
+
+    path = "picture/"
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+
     # SETUP
     plant1 = Plant(50000.0, 10000.0, 100.0)
     plant2 = Plant(600000.0, 80000.0, 50.0)
@@ -130,6 +143,91 @@ if __name__=="__main__":
     Cr                  =   np.linspace(0.0, 0.5, 11)   # usually smaller values
     modules             =   ["BINOMIAL", "EXPONENTIAL"]
 
-    #
-    population, avg, best, worst = differential_evolution(population_size[3],
-    minimum_values, maximum_values, F[0], Cr[2], profit_fitness, modules[0], True)
+
+    if SINGLE:
+        population, avg, best, worst = differential_evolution(population_size[3],
+        minimum_values, maximum_values, F[0], Cr[2], profit_fitness, 150,
+        modules[0], True)
+
+
+        max_value = max(best)*1.154
+        min_value = min(worst)+min(worst)*0.154
+
+        plt.figure("Differential Evolution")
+        plt.xticks(fontsize=10)
+        plt.yticks(fontsize=15)
+        plt.title("Differential Evolution", fontsize=20)
+        plt.ylabel("Profit", fontsize=20)
+        plt.xlabel("Generation", fontsize=20)
+        plt.plot(best, lw=3, label="Best Individual")
+        plt.plot(worst, lw=3, label="Worst Individual")
+        plt.plot(avg, lw=3, label="Average Individual")
+        plt.legend()
+        plt.savefig(path+"best.png")
+
+        plt.figure("Best Individual")
+        plt.xticks(fontsize=10)
+        plt.yticks(fontsize=15)
+        plt.title("Best Individual", fontsize=20)
+        plt.ylabel("Profit", fontsize=20)
+        plt.xlabel("Generation", fontsize=20)
+        plt.plot(best, lw=3)
+        plt.savefig(path+"best.png")
+
+        plt.figure("Worst Individual")
+        plt.xticks(fontsize=10)
+        plt.yticks(fontsize=15)
+        plt.title("Worst Individual", fontsize=20)
+        plt.ylabel("Profit", fontsize=20)
+        plt.xlabel("Generation", fontsize=20)
+        plt.plot(worst, lw=3)
+        plt.savefig(path+"worst.png")
+
+        plt.figure("Average Individual")
+        plt.xticks(fontsize=10)
+        plt.yticks(fontsize=15)
+        plt.title("Average Individual", fontsize=20)
+        plt.ylabel("Profit", fontsize=20)
+        plt.xlabel("Generation", fontsize=20)
+        plt.plot(avg, lw=3)
+        plt.savefig(path+"average.png")
+
+        #plt.show()
+
+
+
+    if SURFACE:
+        # create array to save the value for different setups
+        # 1.dimension: F dimension with length(F)
+        # 2.dimension: Cr diension with lenth(Cr)
+        # 3.dimension: size 3 --> for average, best & worst value for this run
+        surface_data = np.zeros((len(F), len(Cr), 3))
+
+        for indx_F in range(len(F)):
+            for indx_Cr in range(len(Cr)):
+                print("+++++++++ {}, {} ++++++++++".format(indx_F, indx_Cr))
+                population, avg, best, worst = differential_evolution(
+                population_size[3], minimum_values, maximum_values, F[indx_F],
+                Cr[indx_Cr], profit_fitness, 25, modules[0], True)
+
+                # set corresponding data
+                surface_data[indx_F, indx_Cr, :] = avg[-1], best[-1], worst[-1]
+
+
+        # Grid and Average Data
+        X, Y = np.meshgrid(Cr, F)
+        Z = surface_data[:, :, 1]
+
+        fig = plt.figure("SURFACE")
+
+        ax = plt.axes(projection='3d')
+        ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap='viridis', edgecolor='none')
+        ax.set_xlabel('Cross-Ratio')
+        ax.set_ylabel('F')
+        ax.set_zlabel('Profit');
+        ax.set_title('SURFACE: F vs Cross-Ratio');
+
+        plt.xticks(fontsize=15)
+        plt.yticks(fontsize=15)
+
+        plt.show()
