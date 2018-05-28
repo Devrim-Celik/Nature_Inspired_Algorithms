@@ -11,7 +11,6 @@ from de_functions import differential_evolution
 class Plant:
     """
     Class for defining Plants
-
     Attributes
         kWh                 kWh per plant
         cost                cost per plant
@@ -25,7 +24,6 @@ class Plant:
 class Market:
     """
     Class for defining Markets
-
     Attributes
         max_price       maximum price at which customers buy
         max_demand      maximum demand
@@ -41,7 +39,6 @@ def calculate_cost(x, plant):
     """
     Calculates costs for a given amount of require energy and type of energy
         plant
-
     Args:
         x               required energy in [kW]
         plant           type of plant
@@ -65,7 +62,6 @@ def calculate_cost(x, plant):
 def calculate_demand(price, market):
     """
     Calculates deman for a given price and a type of market
-
     Args:
         price               demand
         market              type of market
@@ -128,14 +124,12 @@ if __name__=="__main__":
     # PARAMETERS
     population_size     =   [50, 100, 200, 500, 1000]
     minimum_values      =   [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    maximum_values      =   [1000000000, 1000000000, 1000000000, 1000000000,
-                                1000000000, 1000000000, 1, 1, 1]
+    maximum_values      =   [50000.0, 600000.0, 4000000.0, 2000000.0,
+                                30000000.0, 20000000.0, 0.45, 0.25, 0.2]
     F                   =   np.linspace(0.4, 1.0, 13)   # usually in [0.4 ; 1]
     Cr                  =   np.linspace(0.0, 0.5, 11)   # usually smaller values
-    nr_generations      =   1000
     modules             =   ["BINOMIAL", "EXPONENTIAL"]
 
     #
     population, avg, best, worst = differential_evolution(population_size[3],
-    minimum_values, maximum_values, F[0], Cr[2], profit_fitness,
-    nr_generations, modules[1], True)
+    minimum_values, maximum_values, F[0], Cr[2], profit_fitness, modules[0], True)
