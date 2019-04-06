@@ -1,10 +1,6 @@
 import numpy as np
 import pandas as pd
 
-## EMMA --> THE FUNCTION YOU NEED TO LOOK AT: complete_init() !!!
-# TIPS:
-# Extract pure numpy array from dataframe: dataframe.values!
-
 def load_data(task_nr=1):
     """
     Function to load all the data from the .txt file into numpy
@@ -56,9 +52,10 @@ def init_matrix(capacitys, demands):
 
 
     # filling the dataframe
-    # go through each truck...
     city_counter = 0
-    for truck in range(nr_trucks):
+    # create a random permutations of the trucks, then for each truck...
+    truck_perm = np.random.permutation(nr_trucks)
+    for truck in truck_perm:
         # get the capacity of the truck
         current_cargo = capacitys[truck]
 
@@ -108,7 +105,7 @@ def complete_init(task_nr=1):
     """
 
     # load capacity, demands, distance_matrix, transportation_costs
-    cap, demands, dist, tc = load_data()
+    cap, demands, dist, tc = load_data(task_nr)
 
     # test if task is possible
     if test_task(cap, demands):
@@ -127,6 +124,6 @@ def complete_init(task_nr=1):
 
 
 if (__name__=="__main__"):
-    df, _, _, _, _ = complete_init(task_nr=1)
+    df, cap, demands, dist, tc = complete_init(task_nr=1)
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):
         print(df)
