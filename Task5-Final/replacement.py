@@ -27,7 +27,7 @@ def replacement(old_pop, new_pop, mode="delete-all", n=None,
         if fitness_old == []:
             raise ValueError("[!] 'fitness_old' has to be filled!")
 
-        population = [None]*len(old_pop)
+        population = np.zeros(old_pop.shape)
 
         # take over all members of new population
         for i in range(len(new_pop)):

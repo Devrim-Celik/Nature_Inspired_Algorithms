@@ -2,7 +2,13 @@ import random
 import numpy as np
 
 def mutate(matrix, capacity):
+    """
+    Description
 
+    Args
+        matrix
+        capacity
+    """
     cargo = np.sum(matrix, axis=1)
 
     # so we enter the while loop

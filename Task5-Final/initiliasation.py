@@ -46,11 +46,8 @@ def init_matrix(capacitys, demands):
     truck_labels = ["truck_{}".format(i+1) for i in range(nr_trucks)]
     city_labels = ["city_{}".format(i+1) for i in range(nr_citys)]
 
-    # create dataframe (filled with zeros for now)
-    df = pd.DataFrame(np.zeros((nr_trucks, nr_citys)),
-            index=truck_labels,
-            columns=city_labels)
-
+    # create matrix (filled with zeros for now)
+    member = np.zeros((nr_trucks, nr_citys))
 
     # filling the dataframe
     city_counter = 0
@@ -70,7 +67,7 @@ def init_matrix(capacitys, demands):
 
                 # the truck delivers the city and fullfils its demands
                 # [note that in the dataframe]
-                df.values[truck, city_counter] = demands_copy[city_counter]
+                member[truck, city_counter] = demands_copy[city_counter]
 
                 # of cause, it loses this amount of cargo
                 current_cargo -= demands_copy[city_counter]
@@ -83,7 +80,7 @@ def init_matrix(capacitys, demands):
             else:
                 # if it doesnt have enough to completly fullfil the demands
                 # it only delivers as much as it can...
-                df.values[truck, city_counter] = current_cargo
+                member[truck, city_counter] = current_cargo
 
                 # and the demand is partly fulfilled
                 demands_copy[city_counter] -= current_cargo
@@ -93,7 +90,7 @@ def init_matrix(capacitys, demands):
 
             # when we deliverd all cities, stop!
             if (city_counter == nr_citys):
-                return df
+                return member
 
 
 def complete_init(task_nr=1):
@@ -125,6 +122,5 @@ def complete_init(task_nr=1):
 
 
 if (__name__=="__main__"):
-    df, cap, demands, dist, tc = complete_init(task_nr=1)
-    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-        print(df)
+    member, cap, demands, dist, tc = complete_init(task_nr=1)
+    print(df)

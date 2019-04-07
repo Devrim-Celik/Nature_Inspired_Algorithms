@@ -13,7 +13,7 @@ def vrp_crossover(parents, cap, demands):
     optimal fashion.
     """
     # create an empty child list
-    children = [None]*len(parents)
+    children = np.zeros((len(parents), len(cap), len(demands)))
 
     # for each parent pair
     for i in range(0, len(parents), 2):
@@ -65,7 +65,6 @@ def vrp_crossover(parents, cap, demands):
 
         children[i] = child1
         children[i+1] = child2
-
     return children
 
 def create_children(parent1, parent2):

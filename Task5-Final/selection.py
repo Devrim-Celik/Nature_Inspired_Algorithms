@@ -35,3 +35,34 @@ def roulette_wheel_selection(fitness, n):
                 break
 
     return indx_list
+
+
+
+def tournament_selection(fitness, n, s=2, replacement=False):
+    """
+    Tournament Selection (Ordinal Selection)
+
+    Args:
+        fitness: fitness scores
+        n: number of members to be selected
+        s: number of memebers to enter a tournament
+        replacement: is the same member allowed to enter one tournament twice?
+
+    Returns:
+        indx_list: indexes of members to be selected
+    """
+
+    # list of indexes of selected members
+    indx_list = []
+
+    # do n tournaments
+    for _ in range(n):
+        # select candidates for this tournament
+        candidates = np.random.choice(range(len(fitness)), size=s, \
+            replace=replacement)
+        # fitness scores of selected candidates
+        candidate_scores = [fitness[indx] for indx in candidates]
+        # get index of biggest score and append to the index list
+        indx_list.append(candidate_scores.index(max(candidate_scores)))
+
+    return indx_list
