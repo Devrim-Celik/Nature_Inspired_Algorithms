@@ -64,7 +64,7 @@ def fitness_function(distance_matrix, permutation_list, df, transportation_cost)
         fitness += calculate_distance(path, distance_matrix) * transportation_cost[index]
 
 
-    return fitness
+    return -1*fitness
 
 def calculate_distance(current_path, distance_matrix):
     """

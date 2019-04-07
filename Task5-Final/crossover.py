@@ -1,21 +1,19 @@
 import numpy as np
-
+import random
 
 
 
 def vrp_crossover(parents, cap, demands):
     """
-    Crossover: From two parents, create two children. The way that is done,
-    is simply saying, that the first child, has the 0,2,4,... truck plan
-    from parent 1 and the 1,3,5,... truck plan from parent 2. This way, the
+    Crossover: From two parents, create two children. We build them by randomly
+    taking rows from the two parents. This way, the
     truck capacity demand is not violated. The problem is,
     that this way, the city demand constraint may be violated. To correct this,
     we employ a correction funciton, which fixes this problem in a rather
     optimal fashion.
     """
-
     # create an empty child list
-    children = np.zeros((len(parents)))
+    children = [None]*len(parents)
 
     # for each parent pair
     for i in range(0, len(parents), 2):
@@ -46,27 +44,28 @@ def vrp_crossover(parents, cap, demands):
         # to make space
 
         # child1 positive values
-        for idx, val in net_list_child1:
+        for idx, val in enumerate(net_list_child1):
             if val > 0:
                 child1[:,idx] = too_much(child1[:,idx], val)
         # child1 negative values
-        #for idx, val in net_list_child1:
-            #if val < 0:
-                #child1[:,idx] = too_few(child1[:,idx], val)
+        for idx, val in enumerate(net_list_child1):
+            if val < 0:
+                child1[:,idx] = too_few(child1[:,idx], val, cap, np.sum(child1, axis=1))
 
 
         # child2 positive values
-        for idx, val in net_list_child2:
+        for idx, val in enumerate(net_list_child2):
             if val > 0:
                 child2[:,idx] = too_much(child2[:,idx], val)
         # child2 negative values
-        #for idx, val in net_list_child2:
-            #if val < 0:
-                #child2[:,idx] = too_few(child2[:,idx], val)
+        for idx, val in enumerate(net_list_child2):
+            if val < 0:
+                child2[:,idx] = too_few(child2[:,idx], val, cap, np.sum(child2, axis=1))
 
 
         children[i] = child1
         children[i+1] = child2
+
     return children
 
 def create_children(parent1, parent2):
@@ -84,11 +83,11 @@ def create_children(parent1, parent2):
 
         # for even truck numbers, child1 copies parent1 and child2 copies
         # parent2
-        if i%2==0:
+        if random.uniform(0,1) >= 0.5:
             child1[i,:] = parent1[i,:]
             child2[i,:] = parent2[i,:]
         # for uneven vice versa
-        elif i%2==1:
+        else:
             child1[i,:] = parent2[i,:]
             child2[i,:] = parent1[i,:]
 
@@ -103,8 +102,66 @@ def too_much(col, overflow):
     the right amount
     """
     while overflow != 0:
-        idx_min = np.argmin(col)
-        overflow -= col[idx_min]
-        col[idx_min] = 0
-
+        smallest = 10000000000
+        idx_min = 0
+        #print("NEW")
+        for t, load in enumerate(col):
+            if load > 0:
+                if load < smallest:
+                    smallest, idx_min = load, t
+        #print(idx_min)
+        #print(col[idx_min])
+        if overflow >= col[idx_min]:
+            overflow -= col[idx_min]
+            col[idx_min] = 0
+        else:
+            col[idx_min] -= overflow
+            overflow = 0
     return col
+
+def too_few(column, missing, capacity, truck_cargo):
+
+    #eine city hat zu wenig und soll mehr zugefahren kriegen
+    missing *= -1
+    #die trucks die eh schon fahren kriegen den rest aufgeteilt
+    for index, i in enumerate(column):
+        difference = 0
+        if i != 0 and missing > 0:
+            difference = capacity[index]-column[index]
+            if difference >= missing:
+                column[index] += missing
+                truck_cargo[index] += missing
+                missing = 0
+                break
+            else:
+                column[index] += difference
+                truck_cargo[index] += difference
+                missing -= difference
+
+    #wenn noch was gebraucht wird nimm einen der alles nehmen kann
+    if missing > 0:
+        for index, i in enumerate(column):
+            difference = capacity[index]-truck_cargo[index]
+            if (difference) >= missing:
+                column[index] += missing
+                truck_cargo[index] += missing
+                missing = 0
+                break
+
+
+    #erstelle eine liste mit allen differenzen, also wie viel jeder truck noch aufnehmen kann
+    difference_list = [i-j for i,j in zip(capacity, truck_cargo)]
+    # wenn ein truck nicht alles nehmen kann, dann teile auf die wenigst möglichen auf
+    while missing > 0:
+        # finde den truck mit der meisten übriggebliebenen kapazität
+        max_idx = argmax(difference_list)
+        # gebe diesem truck so viel mit wie er noch nehmen kann
+        column[max_idx] += difference_list[max_idx]
+        truck_cargo[max_idx] += difference_list[max_idx]
+        #ziehe das von difference ab für unsere bedingung
+        missing -= difference_list[max_idx]
+        #setze auf null damit man den nächstgrößeren truck findet
+        difference_list[max_idx] = 0
+
+
+    return column

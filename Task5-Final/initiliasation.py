@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-
+import copy
 def load_data(task_nr=1):
     """
     Function to load all the data from the .txt file into numpy
@@ -40,6 +40,7 @@ def init_matrix(capacitys, demands):
     # "extract" number of cities and number of trucks
     nr_trucks = capacitys.shape[0]
     nr_citys = demands.shape[0]
+    demands_copy = copy.deepcopy(demands)
 
     # names of the rows and cols of the dataframe
     truck_labels = ["truck_{}".format(i+1) for i in range(nr_trucks)]
@@ -64,18 +65,18 @@ def init_matrix(capacitys, demands):
             # then check if the truck can fullfil the demand
             # of the current city:
 
-            if current_cargo >= demands[city_counter]:
+            if current_cargo >= demands_copy[city_counter]:
                 # if it can...
 
                 # the truck delivers the city and fullfils its demands
                 # [note that in the dataframe]
-                df.values[truck, city_counter] = demands[city_counter]
+                df.values[truck, city_counter] = demands_copy[city_counter]
 
                 # of cause, it loses this amount of cargo
-                current_cargo -= demands[city_counter]
+                current_cargo -= demands_copy[city_counter]
 
                 # and the demand is fulfilled
-                demands[city_counter] = 0
+                demands_copy[city_counter] = 0
                 # ... and we move on to the next city
                 city_counter += 1
 
@@ -85,7 +86,7 @@ def init_matrix(capacitys, demands):
                 df.values[truck, city_counter] = current_cargo
 
                 # and the demand is partly fulfilled
-                demands[city_counter] -= current_cargo
+                demands_copy[city_counter] -= current_cargo
 
                 # and it doesnt have any cargo anymore
                 current_cargo = 0
@@ -109,10 +110,10 @@ def complete_init(task_nr=1):
 
     # test if task is possible
     if test_task(cap, demands):
-        print("[+] Task is possible!")
+        pass
+        #print("[+] Task is possible!")
     else:
         raise("[-] ERRROR: BAD TASK!")
-
     # initialize matrix with given data
     dataframe = init_matrix(cap, demands)
 
