@@ -3,11 +3,17 @@ import numpy as np
 
 def mutate(matrix, capacity):
     """
-    Description
+    The function gets a child and the capacity of the trucks and performs
+    the mutation step. Mutation is done by switching the cargo of two different
+    trucks. To do so we need to look for two trucks of which the smaller one
+    has enough space to carry all that was originally carried by the larger
+    one.
 
     Args
-        matrix
-        capacity
+        matrix: a child containing trucks and cities and what is carried
+        capacity: how much the trucks can carry in total
+    Return
+        matrix: the mutated child
     """
     cargo = np.sum(matrix, axis=1)
 
