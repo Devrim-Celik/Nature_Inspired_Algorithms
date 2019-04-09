@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+from tqdm import tqdm
 from time import gmtime, strftime
 
 from initiliasation import complete_init
@@ -10,7 +11,7 @@ from crossover import vrp_crossover
 from mutation import mutate
 from replacement import replacement
 
-def vrp_ga(m=0.2, gen=5000, N = 100, best_N=5, setup=1, plot_folder="plots/"):
+def vrp_ga(m=0.2, gen=500, N = 100, best_N=5, setup=1, plot_folder="plots/"):
     """
     Complete function, optimizing the vehicle routing problem using genetic
     algorithms and a custom crossover/mutation part.
@@ -47,9 +48,7 @@ def vrp_ga(m=0.2, gen=5000, N = 100, best_N=5, setup=1, plot_folder="plots/"):
     for i in range(N):
         population[i] = complete_init(task_nr=setup)[0]
 
-    for gen_idx in range(gen):
-        print("Generation {}".format(gen_idx))
-
+    for gen_idx in tqdm(range(gen)):
         ##### fitness
         permutations = np.array([permute_way(member, dist, demands, cap) for member in population])
         fitness_scores = np.array([fitness_function(dist, permutation, member, tc) for permutation, member in zip(permutations, population)])
